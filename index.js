@@ -35,6 +35,7 @@ async function run() {
     const jobCollection = database.collection("jobs")
     const companyCollection = database.collection("companies")
     const usersCollection = database.collection("user")
+    const applicationCollection = database.collection("applications")
 
     app.get('/users', async(req, res) =>{
       const cursor = usersCollection.find()
@@ -63,6 +64,30 @@ async function run() {
         }
         const result = await jobCollection.insertOne(newJob)
         res.send(result)
+    })
+
+    //application API
+    app.get('/api/application', async (req, res) =>{
+      const query = {}
+      if(req.query.applicantId){
+        query.applicantId = req.query.applicantId
+      }
+      if(req.query.jobId){
+        query.jobId = req.query.jobId
+      }
+    })
+
+    
+
+    app.post('/api/applications', async(req, res) =>{
+      const application = req.body
+      const newApplication = {
+        ...application,
+        createdAt: new Date()
+
+      }
+      const result = await applicationCollection.insertOne(newApplication)
+      res.send(result)
     })
 
 
