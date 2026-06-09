@@ -68,16 +68,26 @@ async function run() {
     });
 
     //application API
-    app.get("/api/application", async (req, res) => {
-      const query = {};
-      if (req.query.applicantId) {
-        query.applicantId = req.query.applicantId;
-      }
-      if (req.query.jobId) {
-        query.jobId = req.query.jobId;
-      }
-    });
+ // 1. PLURALIZED GET APPLICATIONS ENDPOINT
+app.get("/api/applications", async (req, res) => {
+  try {
+    const query = {};
+    
+    if (req.query.applicantId) {
+      query.applicantId = req.query.applicantId;
+    }
+    if (req.query.jobId) {
+      query.jobId = req.query.jobId;
+    }
 
+    const cursor = applicationCollection.find(query);
+    const result = await cursor.toArray();
+    res.send(result);
+  } catch (error) {
+    console.error("Failed to query applications collection:", error);
+    res.status(500).send([]);
+  }
+});
     app.post("/api/applications", async (req, res) => {
       const application = req.body;
       const newApplication = {
