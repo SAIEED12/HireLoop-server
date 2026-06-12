@@ -11,12 +11,21 @@ app.use(cors());
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { verify } = require("node:crypto");
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
+const logger = (req, res, next) =>{
+    console.log('logger loggerd', req.params)
+    next()
+}
 
+const verifyToken = (req, res, next) =>{
+    console.log('headers', req.headers)
+    next()
+}
 
 
 const uri = process.env.MONGO_DB_URI;
@@ -109,7 +118,7 @@ async function run() {
 
         // company related apis
         app.get('/api/companies', async (req, res) => {
-            const cursor = companyCollection.find().skip(4);
+            const cursor = companyCollection.find()
             const result = await cursor.toArray();
             res.send(result);
         })
@@ -133,6 +142,18 @@ async function run() {
             }
             const result = await companyCollection.insertOne(newCompany);
             res.send(result);
+        })
+
+        app.patch('/api/companies/:id', logger, verifyToken, async(req, res) =>{
+            const id = req.params.id
+            const updatedCompany = req.body
+            const filter = {_id: new ObjectId(id)}
+            const updatedDoc = {
+                $set: {
+                    status: updatedCompany.status
+                }
+            }
+            const result = await companyCollection.updateOne(filter, updatedDoc)
         })
 
         // plans 
